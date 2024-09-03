@@ -10,14 +10,15 @@ custom:
 provider:
   name: aws
   runtime: nodejs18.x
-
   iam:
     role:
       statements:
         - Effect: Allow
           Action: dynamodb:scan
           Resource: !GetAtt RestaurantsTable.Arn
-
+        - Effect: Allow
+          Action: execute-api:Invoke
+          Resource: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/${sls:stage}/GET/restaurants
 functions:
   get-index:
     handler: functions/get-index.handler
@@ -34,6 +35,7 @@ functions:
       - http:
           path: /restaurants
           method: get
+          authorizer: aws_iam
     environment:
       default_results: 8
       restaurants_table: !Ref RestaurantsTable
